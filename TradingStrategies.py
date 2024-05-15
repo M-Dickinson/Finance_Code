@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import datetime
 import numpy as np
 import pandas as pd
 import yfinance as yf
@@ -36,7 +37,7 @@ def show_dist(data):
 
 
 start_date = '2022-01-01'
-end_date = None
+end_date = (datetime.date.today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
 
 symbols = ['^DJI', '^GSPC', '^IXIC']
 symbol_string = ''
