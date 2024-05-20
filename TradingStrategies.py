@@ -50,11 +50,21 @@ def show_corr(data1, data2):
     sns.scatterplot(x=data1, y=data2)
     plt.show()
 
+def show_sdev_dist(data):
+    sns.set_theme()
+    percent = data.pct_change().dropna()
+    average = mean(percent)
+    standev = sdev(percent)
+    sdevdist = (percent - average) / standev
+    sns.displot(sdevdist, bins=50, kde=False, stat='probability', aspect=2)
+    plt.show()
 
-start_date = '2022-01-01'
+
+interval = '1d'
+start_date = '2019-01-01' 
 end_date = (datetime.date.today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
 
-symbols = ['AAPL', '^IXIC', '^DJI', 'CRWD']
+symbols = ['F', 'GM', 'IPB', 'MS', 'MRK', 'PFE']
 symbol_string = ''
 for i in symbols:
     symbol_string += i + ' '
@@ -75,11 +85,25 @@ print(sdev(data['Adj Close']['CRWD']))
 
 show_price(data)
 show_dist(data)
-
-show_corr(data['Adj Close']['AAPL'], data['Adj Close']['^IXIC'])
+#show_corr(data['Adj Close']['AAPL'], data['Adj Close']['^IXIC'])
 print(corr(data['Adj Close']['AAPL'], data['Adj Close']['^IXIC']))
+#show_corr(data['Adj Close']['AAPL'].pct_change(), data['Adj Close']['^IXIC'].pct_change())
+print(corr(data['Adj Close']['AAPL'].pct_change().dropna(), data['Adj Close']['^IXIC'].pct_change().dropna()))
+print(data['Adj Close']['^IXIC'].pct_change())
 show_corr(data['Adj Close']['CRWD'], data['Adj Close']['^DJI'])
 print(corr(data['Adj Close']['CRWD'], data['Adj Close']['^DJI']))
 show_corr(data['Adj Close']['AAPL'], data['Adj Close']['AAPL'] * -1)
 print(corr(data['Adj Close']['AAPL'], data['Adj Close']['AAPL'] * -1))
+
+show_corr(data['Adj Close']['NG=F'], data['Adj Close']['^GSPC'])
+print(corr(data['Adj Close']['NG=F'].dropna(), data['Adj Close']['^GSPC'].dropna()))
+show_corr(data['Adj Close']['NG=F'].pct_change(fill_method=None).dropna(), data['Adj Close']['^GSPC'].pct_change(fill_method=None).dropna())
+print(corr(data['Adj Close']['NG=F'].pct_change(fill_method=None).dropna(), data['Adj Close']['^GSPC'].pct_change(fill_method=None).dropna()))
+show_corr(data['Adj Close']['F'].pct_change(fill_method=None).dropna(), data['Adj Close']['GM'].pct_change(fill_method=None).dropna())
+print(corr(data['Adj Close']['F'].pct_change(fill_method=None).dropna(), data['Adj Close']['GM'].pct_change(fill_method=None).dropna()))
+show_corr(data['Adj Close']['IPB'].pct_change(fill_method=None).dropna(), data['Adj Close']['MS'].pct_change(fill_method=None).dropna())
+print(corr(data['Adj Close']['IPB'].pct_change(fill_method=None).dropna(), data['Adj Close']['MS'].pct_change(fill_method=None).dropna()))
+show_corr(data['Adj Close']['MRK'].pct_change(fill_method=None).dropna(), data['Adj Close']['PFE'].pct_change(fill_method=None).dropna())
+print(corr(data['Adj Close']['MRK'].pct_change(fill_method=None).dropna(), data['Adj Close']['PFE'].pct_change(fill_method=None).dropna()))
 """
+show_sdev_dist(data['Adj Close']['F'])
