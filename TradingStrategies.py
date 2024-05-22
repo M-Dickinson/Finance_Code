@@ -1,12 +1,14 @@
 #!/usr/bin/python3
 
 import datetime
+import math
 import numpy as np
 import pandas as pd
 import yfinance as yf
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+#pd.set_option('display.max_rows', 1500)
 
 def mean(data):
     total = 0
@@ -41,7 +43,7 @@ def show_price(data):
 
 def show_dist(data):
     sns.set_theme()
-    sns.displot(data['Adj Close'].pct_change() * 100, bins=50, kde=True, stat='probability', aspect=2)
+    sns.displot(data['Adj Close'].pct_change(fill_method=None).dropna() * 100, bins=50, kde=True, stat='probability', aspect=2)
     plt.xlabel("Percent Change")
     plt.show()
 
@@ -50,21 +52,33 @@ def show_corr(data1, data2):
     sns.scatterplot(x=data1, y=data2)
     plt.show()
 
-def show_sdev_dist(data):
+def show_sdev_dist(data, binwidth):
     sns.set_theme()
-    percent = data.pct_change().dropna()
+    percent = data.pct_change(fill_method=None).dropna()
     average = mean(percent)
     standev = sdev(percent)
-    sdevdist = (percent - average) / standev
-    sns.displot(sdevdist, bins=50, kde=False, stat='probability', aspect=2)
+    sdev_dist = (percent - average) / standev
+    sdev_average = mean(sdev_dist)
+    sdev_standev = sdev(sdev_dist)
+    curr = sdev_dist.min()
+    standev_max = sdev_dist.max()
+    step = (standev_max - curr) / 1000
+    normal_val = []
+    curr_val = []
+    for i in range(1000):
+        curr_val.append(curr)
+        normal_val.append(((1 / (sdev_standev * ((2 * math.pi) ** 0.5))) * (math.exp((((curr - sdev_average) ** 2) * -1) / (2 * (sdev_standev  ** 2)))) * binwidth))
+        curr += step
+    normal_data = pd.DataFrame({'Sdevs' : curr_val, 'Normal' : normal_val})
+    sns.displot(sdev_dist, kde=False, binwidth=binwidth, stat='probability', aspect=2)
+    sns.lineplot(normal_data, x='Sdevs', y='Normal')
     plt.show()
 
-
 interval = '1d'
-start_date = '2019-01-01' 
+start_date = '2022-01-01'
 end_date = (datetime.date.today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
 
-symbols = ['F', 'GM', 'IPB', 'MS', 'MRK', 'PFE']
+symbols = ['NG=F', 'AAPL', '^GSPC', 'CRWD']
 symbol_string = ''
 for i in symbols:
     symbol_string += i + ' '
@@ -105,5 +119,11 @@ show_corr(data['Adj Close']['IPB'].pct_change(fill_method=None).dropna(), data['
 print(corr(data['Adj Close']['IPB'].pct_change(fill_method=None).dropna(), data['Adj Close']['MS'].pct_change(fill_method=None).dropna()))
 show_corr(data['Adj Close']['MRK'].pct_change(fill_method=None).dropna(), data['Adj Close']['PFE'].pct_change(fill_method=None).dropna())
 print(corr(data['Adj Close']['MRK'].pct_change(fill_method=None).dropna(), data['Adj Close']['PFE'].pct_change(fill_method=None).dropna()))
+
+stock = 'NG=F'
+show_sdev_dist(data['Adj Close'][stock], 1)
+show_sdev_dist(data['Adj Close'][stock], 0.75)
+show_sdev_dist(data['Adj Close'][stock], 0.5)
+show_sdev_dist(data['Adj Close'][stock], 0.25)
+show_sdev_dist(data['Adj Close'][stock], 0.1)
 """
-show_sdev_dist(data['Adj Close']['F'])
