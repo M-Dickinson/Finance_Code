@@ -38,10 +38,23 @@ def corr(data1, data2):
     return total / (len(data1) * sdev1 * sdev2)
 
 def daily_risk(data, value):
-    risk = sdev(data[-22:-1].pct_change(fill_method=None).dropna())
+    risk = sdev(data[-20:].pct_change(fill_method=None).dropna())
     print('Today\'s Risk : ' + str(risk))
     print('68% Confidence of gain/loss within : ' + str(risk * value))
     print('95% Confidence of gain/loss within : ' + str(risk * value * 2))
+
+def moving_average(data, days):
+    return sum(data.iloc[-days:]) / days
+
+def exponential_moving_average(data, days):
+    alpha = 2 / (1 + days)
+    return (alpha * data.iloc[-1]) + ((1 - alpha) * (sum(data.iloc[-days - 1:-1]) / days))
+
+def weighted_moving_average(data, days):
+    total = 0
+    for i, j in zip(data.iloc[-days:], range(-days, 0)):
+        total += i * -j
+    return total * (2 / (days**2 + days))
 
 def show_price(data):
     sns.set_theme()
@@ -95,8 +108,9 @@ def show_volatility(data):
 
 
 interval = '1d'
-start_date = '2019-01-01'
-end_date = (datetime.date.today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+start_date = '2024-01-01'
+#end_date = (datetime.date.today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+end_date = datetime.date.today().strftime('%Y-%m-%d')
 
 symbols = ['CADUSD=X', 'INTC', 'GE', 'NG=F', 'AAPL', '^GSPC', 'CRWD']
 symbol_string = ''
@@ -146,10 +160,14 @@ show_sdev_dist(data['Adj Close'][stock], 0.75)
 show_sdev_dist(data['Adj Close'][stock], 0.5)
 show_sdev_dist(data['Adj Close'][stock], 0.25)
 show_sdev_dist(data['Adj Close'][stock], 0.1)
-"""
+
 show_volatility(data['Adj Close']['AAPL'])
 show_volatility(data['Adj Close']['CADUSD=X'])
 
 daily_risk(data['Adj Close']['AAPL'], 20000000)
 daily_risk(data['Adj Close']['CADUSD=X'], 20000000)
-
+"""
+print(moving_average(data['Adj Close']['AAPL'], 20))
+print(exponential_moving_average(data['Adj Close']['AAPL'], 20))
+# DOUBLE CHECK THIS ONE!!! VVV
+#print(weighted_moving_average(data['Adj Close']['AAPL'], 20))
