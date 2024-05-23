@@ -8,7 +8,8 @@ import yfinance as yf
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-#pd.set_option('display.max_rows', 1500)
+pd.set_option('display.max_rows', 1500)
+
 
 def mean(data):
     total = 0
@@ -74,9 +75,23 @@ def show_sdev_dist(data, binwidth):
     sns.lineplot(normal_data, x='Sdevs', y='Normal')
     plt.show()
 
+def show_volatility(data):
+    percent = data.pct_change(fill_method=None).dropna()
+    data = []
+    index = []
+    for i in range(len(percent) - 20):
+        data.append(sdev(percent.iloc[i:i+20]) * (252 ** 0.5))
+        index.append(percent.index[i+20])
+    final_data = pd.DataFrame({'Data' : data}, index=index)
+    sns.lineplot(final_data)
+    plt.show()
+    
+
+
 interval = '1d'
-start_date = '2022-01-01'
-end_date = (datetime.date.today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+start_date = '1990-01-01'
+#end_date = (datetime.date.today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+end_date = '2001-01-30'
 
 symbols = ['NG=F', 'AAPL', '^GSPC', 'CRWD']
 symbol_string = ''
@@ -99,9 +114,9 @@ print(sdev(data['Adj Close']['CRWD']))
 
 show_price(data)
 show_dist(data)
-#show_corr(data['Adj Close']['AAPL'], data['Adj Close']['^IXIC'])
+show_corr(data['Adj Close']['AAPL'], data['Adj Close']['^IXIC'])
 print(corr(data['Adj Close']['AAPL'], data['Adj Close']['^IXIC']))
-#show_corr(data['Adj Close']['AAPL'].pct_change(), data['Adj Close']['^IXIC'].pct_change())
+show_corr(data['Adj Close']['AAPL'].pct_change(), data['Adj Close']['^IXIC'].pct_change())
 print(corr(data['Adj Close']['AAPL'].pct_change().dropna(), data['Adj Close']['^IXIC'].pct_change().dropna()))
 print(data['Adj Close']['^IXIC'].pct_change())
 show_corr(data['Adj Close']['CRWD'], data['Adj Close']['^DJI'])
@@ -127,3 +142,4 @@ show_sdev_dist(data['Adj Close'][stock], 0.5)
 show_sdev_dist(data['Adj Close'][stock], 0.25)
 show_sdev_dist(data['Adj Close'][stock], 0.1)
 """
+show_volatility(data['Adj Close']['^GSPC'])
