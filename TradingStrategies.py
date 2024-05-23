@@ -58,7 +58,7 @@ def weighted_moving_average(data, days):
 
 def show_price(data):
     sns.set_theme()
-    sns.lineplot(data['Adj Close'], dashes=False)
+    sns.lineplot(data, dashes=False)
     plt.show()
 
 def show_dist(data):
@@ -104,12 +104,43 @@ def show_volatility(data):
     final_data = pd.DataFrame({'Data' : data}, index=index)
     sns.lineplot(final_data)
     plt.show()
-    
+
+def show_moving_average(data, days):
+    average = []
+    index = []
+    for i in range(days, len(data)):
+        average.append(moving_average(data[i-days:i], days))
+        index.append(data.index[i])
+    final_data = pd.DataFrame({'Average' : average}, index=index)
+    sns.lineplot(data, dashes=False)
+    sns.lineplot(final_data, palette=['orange'])
+    plt.show()
+
+def show_exponential_moving_average(data, days):
+    average = []
+    index = []
+    for i in range(days, len(data)):
+        average.append(exponential_moving_average(data[i-days:i], days))
+        index.append(data.index[i])
+    final_data = pd.DataFrame({'Average' : average}, index=index)
+    sns.lineplot(data, dashes=False)
+    sns.lineplot(final_data, palette=['orange'])
+    plt.show()
+
+def show_weighted_moving_average(data, days):
+    average = []
+    index = []
+    for i in range(days, len(data)):
+        average.append(weighted_moving_average(data[i-days:i], days))
+        index.append(data.index[i])
+    final_data = pd.DataFrame({'Average' : average}, index=index)
+    sns.lineplot(data, dashes=False)
+    sns.lineplot(final_data, palette=['orange'])
+    plt.show()
 
 
 interval = '1d'
-start_date = '2024-01-01'
-#end_date = (datetime.date.today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+start_date = '2023-01-01'
 end_date = datetime.date.today().strftime('%Y-%m-%d')
 
 symbols = ['CADUSD=X', 'INTC', 'GE', 'NG=F', 'AAPL', '^GSPC', 'CRWD']
@@ -171,3 +202,7 @@ print(moving_average(data['Adj Close']['AAPL'], 20))
 print(exponential_moving_average(data['Adj Close']['AAPL'], 20))
 # DOUBLE CHECK THIS ONE!!! VVV
 #print(weighted_moving_average(data['Adj Close']['AAPL'], 20))
+
+show_moving_average(data['Adj Close']['AAPL'].dropna(), 20)
+show_exponential_moving_average(data['Adj Close']['AAPL'].dropna(), 20)
+show_weighted_moving_average(data['Adj Close']['AAPL'].dropna(), 20)
