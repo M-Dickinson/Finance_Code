@@ -37,6 +37,12 @@ def corr(data1, data2):
         total += ((ix - mean1) * (iy - mean2))
     return total / (len(data1) * sdev1 * sdev2)
 
+def daily_risk(data, value):
+    risk = sdev(data[-22:-1].pct_change(fill_method=None).dropna())
+    print('Today\'s Risk : ' + str(risk))
+    print('68% Confidence of gain/loss within : ' + str(risk * value))
+    print('95% Confidence of gain/loss within : ' + str(risk * value * 2))
+
 def show_price(data):
     sns.set_theme()
     sns.lineplot(data['Adj Close'], dashes=False)
@@ -89,11 +95,10 @@ def show_volatility(data):
 
 
 interval = '1d'
-start_date = '1990-01-01'
-#end_date = (datetime.date.today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
-end_date = '2001-01-30'
+start_date = '2019-01-01'
+end_date = (datetime.date.today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
 
-symbols = ['NG=F', 'AAPL', '^GSPC', 'CRWD']
+symbols = ['CADUSD=X', 'INTC', 'GE', 'NG=F', 'AAPL', '^GSPC', 'CRWD']
 symbol_string = ''
 for i in symbols:
     symbol_string += i + ' '
@@ -142,4 +147,9 @@ show_sdev_dist(data['Adj Close'][stock], 0.5)
 show_sdev_dist(data['Adj Close'][stock], 0.25)
 show_sdev_dist(data['Adj Close'][stock], 0.1)
 """
-show_volatility(data['Adj Close']['^GSPC'])
+show_volatility(data['Adj Close']['AAPL'])
+show_volatility(data['Adj Close']['CADUSD=X'])
+
+daily_risk(data['Adj Close']['AAPL'], 20000000)
+daily_risk(data['Adj Close']['CADUSD=X'], 20000000)
+
