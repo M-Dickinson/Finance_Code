@@ -46,14 +46,16 @@ def daily_risk(data, value):
 def moving_average(data, days):
     return sum(data.iloc[-days:]) / days
 
+"""
 def exponential_moving_average(data, days):
     alpha = 2 / (1 + days)
-    return (alpha * data.iloc[-1]) + ((1 - alpha) * (sum(data.iloc[-days - 1:-1]) / days))
+    return (alpha * data.iloc[-1]) + ((1 - alpha) * (sum(data.iloc[-days - 1:-1]) / (days)))
+"""
 
 def weighted_moving_average(data, days):
     total = 0
-    for i, j in zip(data.iloc[-days:], range(-days, 0)):
-        total += i * -j
+    for i, j in zip(data.iloc[-days:], range(1, days + 1)):
+        total += i * j
     return total * (2 / (days**2 + days))
 
 def show_price(data):
@@ -104,7 +106,7 @@ def show_volatility(data):
     final_data = pd.DataFrame({'Data' : data}, index=index)
     sns.lineplot(final_data)
     plt.show()
-
+"""
 def show_moving_average(data, days):
     average = []
     index = []
@@ -137,13 +139,13 @@ def show_weighted_moving_average(data, days):
     sns.lineplot(data, dashes=False)
     sns.lineplot(final_data, palette=['orange'])
     plt.show()
-
+"""
 
 interval = '1d'
 start_date = '2023-01-01'
-end_date = datetime.date.today().strftime('%Y-%m-%d')
+end_date = None
 
-symbols = ['CADUSD=X', 'INTC', 'GE', 'NG=F', 'AAPL', '^GSPC', 'CRWD']
+symbols = ['INTC', 'GE', 'NG=F', 'AAPL', '^GSPC', 'CRWD']
 symbol_string = ''
 for i in symbols:
     symbol_string += i + ' '
@@ -198,11 +200,9 @@ show_volatility(data['Adj Close']['CADUSD=X'])
 daily_risk(data['Adj Close']['AAPL'], 20000000)
 daily_risk(data['Adj Close']['CADUSD=X'], 20000000)
 """
-print(moving_average(data['Adj Close']['AAPL'], 20))
-print(exponential_moving_average(data['Adj Close']['AAPL'], 20))
-# DOUBLE CHECK THIS ONE!!! VVV
-#print(weighted_moving_average(data['Adj Close']['AAPL'], 20))
-
-show_moving_average(data['Adj Close']['AAPL'].dropna(), 20)
-show_exponential_moving_average(data['Adj Close']['AAPL'].dropna(), 20)
-show_weighted_moving_average(data['Adj Close']['AAPL'].dropna(), 20)
+print(moving_average(data['Close']['AAPL'], 20))
+#print(exponential_moving_average(data['Close']['AAPL'], 20))
+print(weighted_moving_average(data['Close']['AAPL'], 20))
+#show_moving_average(data['Adj Close']['AAPL'].dropna(), 20)
+#show_exponential_moving_average(data['Adj Close']['AAPL'].dropna(), 20)
+#show_weighted_moving_average(data['Adj Close']['AAPL'].dropna(), 20)
