@@ -43,14 +43,15 @@ def daily_risk(data, value):
     print('68% Confidence of gain/loss within : ' + str(risk * value))
     print('95% Confidence of gain/loss within : ' + str(risk * value * 2))
 
-def moving_average(data, days):
+def simple_moving_average(data, days):
     return sum(data.iloc[-days:]) / days
 
-"""
 def exponential_moving_average(data, days):
+    curr = simple_moving_average(data.iloc[:days], days)
     alpha = 2 / (1 + days)
-    return (alpha * data.iloc[-1]) + ((1 - alpha) * (sum(data.iloc[-days - 1:-1]) / (days)))
-"""
+    for i in data.iloc[days:]:
+        curr = (alpha * i) + ((1 - alpha) * curr)
+    return curr
 
 def weighted_moving_average(data, days):
     total = 0
@@ -106,18 +107,18 @@ def show_volatility(data):
     final_data = pd.DataFrame({'Data' : data}, index=index)
     sns.lineplot(final_data)
     plt.show()
-"""
-def show_moving_average(data, days):
+
+def show_simple_moving_average(data, days):
     average = []
     index = []
-    for i in range(days, len(data)):
-        average.append(moving_average(data[i-days:i], days))
+    for i in range(days-1, len(data)):
+        average.append(simple_moving_average(data.iloc[i-days+1:i+1], 20))
         index.append(data.index[i])
-    final_data = pd.DataFrame({'Average' : average}, index=index)
+    average_data = pd.DataFrame({'Average' : average}, index=index)
     sns.lineplot(data, dashes=False)
-    sns.lineplot(final_data, palette=['orange'])
+    sns.lineplot(average_data, palette=['orange'])
     plt.show()
-
+"""
 def show_exponential_moving_average(data, days):
     average = []
     index = []
@@ -145,7 +146,7 @@ interval = '1d'
 start_date = '2023-01-01'
 end_date = None
 
-symbols = ['INTC', 'GE', 'NG=F', 'AAPL', '^GSPC', 'CRWD']
+symbols = ['CADUSD=X', 'INTC', 'GE', 'NG=F', 'AAPL', '^GSPC', 'CRWD']
 symbol_string = ''
 for i in symbols:
     symbol_string += i + ' '
@@ -200,9 +201,9 @@ show_volatility(data['Adj Close']['CADUSD=X'])
 daily_risk(data['Adj Close']['AAPL'], 20000000)
 daily_risk(data['Adj Close']['CADUSD=X'], 20000000)
 """
-print(moving_average(data['Close']['AAPL'], 20))
-#print(exponential_moving_average(data['Close']['AAPL'], 20))
-print(weighted_moving_average(data['Close']['AAPL'], 20))
-#show_moving_average(data['Adj Close']['AAPL'].dropna(), 20)
+print(simple_moving_average(data['Close']['AAPL'].dropna(), 20))
+print(exponential_moving_average(data['Close']['AAPL'].dropna(), 20))
+print(weighted_moving_average(data['Close']['AAPL'].dropna(), 20))
+show_simple_moving_average(data['Close']['AAPL'].dropna(), 20)
 #show_exponential_moving_average(data['Adj Close']['AAPL'].dropna(), 20)
 #show_weighted_moving_average(data['Adj Close']['AAPL'].dropna(), 20)
