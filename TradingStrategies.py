@@ -111,36 +111,40 @@ def show_volatility(data):
 def show_simple_moving_average(data, days):
     average = []
     index = []
-    for i in range(days-1, len(data)):
-        average.append(simple_moving_average(data.iloc[i-days+1:i+1], 20))
+    for i in range(days, len(data)+1):
+        average.append(simple_moving_average(data.iloc[i-days:i], days))
+        index.append(data.index[i-1])
+    average_data = pd.DataFrame({'Average' : average}, index=index)
+    sns.lineplot(data, dashes=False)
+    sns.lineplot(average_data, palette=['orange'])
+    plt.show()
+
+def show_exponential_moving_average(data, days):
+    average = []
+    index = []
+    curr = simple_moving_average(data.iloc[:days], days)
+    alpha = 2 / (1 + days)
+    for i in range(days, len(data)):
+        curr = (alpha * data.iloc[i]) + ((1 - alpha) * curr)
+        average.append(curr)
         index.append(data.index[i])
     average_data = pd.DataFrame({'Average' : average}, index=index)
     sns.lineplot(data, dashes=False)
     sns.lineplot(average_data, palette=['orange'])
     plt.show()
-"""
-def show_exponential_moving_average(data, days):
-    average = []
-    index = []
-    for i in range(days, len(data)):
-        average.append(exponential_moving_average(data[i-days:i], days))
-        index.append(data.index[i])
-    final_data = pd.DataFrame({'Average' : average}, index=index)
-    sns.lineplot(data, dashes=False)
-    sns.lineplot(final_data, palette=['orange'])
-    plt.show()
+    print(average_data)
 
 def show_weighted_moving_average(data, days):
     average = []
     index = []
-    for i in range(days, len(data)):
+    for i in range(days, len(data)+1):
         average.append(weighted_moving_average(data[i-days:i], days))
-        index.append(data.index[i])
-    final_data = pd.DataFrame({'Average' : average}, index=index)
+        index.append(data.index[i-1])
+    average_data = pd.DataFrame({'Average' : average}, index=index)
     sns.lineplot(data, dashes=False)
-    sns.lineplot(final_data, palette=['orange'])
+    sns.lineplot(average_data, palette=['orange'])
     plt.show()
-"""
+
 
 interval = '1d'
 start_date = '2023-01-01'
@@ -200,10 +204,12 @@ show_volatility(data['Adj Close']['CADUSD=X'])
 
 daily_risk(data['Adj Close']['AAPL'], 20000000)
 daily_risk(data['Adj Close']['CADUSD=X'], 20000000)
-"""
+
 print(simple_moving_average(data['Close']['AAPL'].dropna(), 20))
 print(exponential_moving_average(data['Close']['AAPL'].dropna(), 20))
 print(weighted_moving_average(data['Close']['AAPL'].dropna(), 20))
 show_simple_moving_average(data['Close']['AAPL'].dropna(), 20)
-#show_exponential_moving_average(data['Adj Close']['AAPL'].dropna(), 20)
-#show_weighted_moving_average(data['Adj Close']['AAPL'].dropna(), 20)
+show_exponential_moving_average(data['Close']['AAPL'].dropna(), 20)
+show_weighted_moving_average(data['Close']['AAPL'].dropna(), 20)
+"""
+
