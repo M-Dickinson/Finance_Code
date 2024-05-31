@@ -145,6 +145,21 @@ def show_weighted_moving_average(data, days):
     sns.lineplot(average_data, palette=['orange'])
     plt.show()
 
+def channels(data, days):
+    high = []
+    low = []
+    index = []
+    for i in range(days, len(data)+1):
+        high.append(max(data['High'][i-days:i]))
+        low.append(min(data['Low'][i-days:i]))
+        index.append(data.index[i-1])
+    high_data = pd.DataFrame({'High' : high}, index=index)
+    low_data = pd.DataFrame({'Low' : low}, index=index)
+    sns.lineplot(data['Close'], dashes=False)
+    sns.lineplot(high_data, palette=['green'])
+    sns.lineplot(low_data, palette=['red'])
+    plt.show()
+
 
 interval = '1d'
 start_date = '2023-01-01'
@@ -213,3 +228,7 @@ show_exponential_moving_average(data['Close']['AAPL'].dropna(), 20)
 show_weighted_moving_average(data['Close']['AAPL'].dropna(), 20)
 """
 
+newdata = data.swaplevel(axis=1)
+#print(newdata['AAPL']['High'].dropna())
+#print(newdata.loc[:, ['AAPL', 'CRWD']]['AAPL']['High'].dropna())
+channels(newdata['AAPL'].dropna(), 20)
