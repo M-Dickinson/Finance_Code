@@ -160,6 +160,18 @@ def channels(data, days):
     sns.lineplot(low_data, palette=['red'])
     plt.show()
 
+def momentum(data, days):
+    momentum = []
+    index = []
+    for i in range(days, len(data)):
+        momentum.append(data['Close'].iloc[i] - data['Close'].iloc[i-days])
+        index.append(data.index[i])
+    momentum_data = pd.DataFrame({'Momentum' : momentum}, index=index)
+    print(momentum_data)
+    sns.lineplot(data['Close'], dashes=False)
+    sns.lineplot(momentum_data, palette=['orange'])
+    plt.show()
+
 
 interval = '1d'
 start_date = '2023-01-01'
@@ -231,4 +243,5 @@ show_weighted_moving_average(data['Close']['AAPL'].dropna(), 20)
 newdata = data.swaplevel(axis=1)
 #print(newdata['AAPL']['High'].dropna())
 #print(newdata.loc[:, ['AAPL', 'CRWD']]['AAPL']['High'].dropna())
-channels(newdata['AAPL'].dropna(), 20)
+#channels(newdata['AAPL'].dropna(), 20)
+momentum(newdata['AAPL'].dropna(), 20)
