@@ -167,10 +167,60 @@ def momentum(data, days):
         momentum.append(data['Close'].iloc[i] - data['Close'].iloc[i-days])
         index.append(data.index[i])
     momentum_data = pd.DataFrame({'Momentum' : momentum}, index=index)
-    print(momentum_data)
     sns.lineplot(data['Close'], dashes=False)
     sns.lineplot(momentum_data, palette=['orange'])
     plt.show()
+
+def volatility_breakouts(data, days):
+    reference_close = []
+    reference_open = []
+    reference_EMA = []
+    percent = data['Close'].pct_change() * 100
+    volatility_sdev_return = []
+    volatility_sdev_price = []
+    true_range = []
+    index = []
+    for i in range(days, len(data)):
+        reference_close.append(data['Close'].iloc[i-1])
+        reference_open.append(data['Open'].iloc[i])
+        reference_EMA.append(exponential_moving_average(data['Close'].iloc[i-4:i+1], 5))
+        volatility_sdev_return.append(sdev(percent[i-days+1:i+1]))
+        volatility_sdev_price.append(sdev(data['Close'].iloc[i-days+1:i+1]))
+        highLow = data['High'].iloc[i] - data['Low'].iloc[i]
+        highClose = data['High'].iloc[i] - data['Close'].iloc[i-1]
+        closeLow = data['Close'].iloc[i-1] - data['Low'].iloc[i]
+        if highLow > highClose:
+            if closeLow > highLow:
+                true_range.append(closeLow)
+            else :
+                true_range.append(highLow)
+        elif closeLow > highClose:
+            true_range.append(closeLow)
+        else :
+            true_range.append(highClose)
+        index.append(data.index[i])
+    volatility_ATR = []
+    volatility_ATR.append(sum(true_range[:days])/days)
+    for i in range(days, len(true_range)):
+        volatility_ATR.append((((volatility_ATR[i-days] * (days-1)) + true_range[i]) / days))
+    upper_trigger = []
+    lower_trigger = []
+    for i, j in zip(volatility_ATR, reference_close[days-1:]):
+        upper_trigger.append(j+i)
+        lower_trigger.append(j-i)
+    sdev_return_data = pd.DataFrame({'Sdev_Return' : volatility_sdev_return}, index=index)
+    sdev_price_data = pd.DataFrame({'Sdev_Price' : volatility_sdev_price}, index=index)
+    ATR_data = pd.DataFrame({'ATR' : volatility_ATR}, index=index[days-1:])
+    upper_trigger_data = pd.DataFrame({'Upper Trigger' : upper_trigger}, index=index[days-1:])
+    lower_trigger_data = pd.DataFrame({'Lower Trigger' : lower_trigger}, index=index[days-1:])
+    sns.lineplot(ATR_data, palette=['blue'])
+    sns.lineplot(sdev_return_data, palette=['orange'])
+    sns.lineplot(sdev_price_data, palette=['purple'])
+    sns.lineplot(data['Close'])
+    sns.lineplot(upper_trigger_data, palette=['green'])
+    sns.lineplot(lower_trigger_data, palette=['red'])
+    plt.show()    
+
 
 
 interval = '1d'
@@ -241,7 +291,10 @@ show_weighted_moving_average(data['Close']['AAPL'].dropna(), 20)
 """
 
 newdata = data.swaplevel(axis=1)
-#print(newdata['AAPL']['High'].dropna())
-#print(newdata.loc[:, ['AAPL', 'CRWD']]['AAPL']['High'].dropna())
-#channels(newdata['AAPL'].dropna(), 20)
+"""
+print(newdata['AAPL']['High'].dropna())
+print(newdata.loc[:, ['AAPL', 'CRWD']]['AAPL']['High'].dropna())
+channels(newdata['AAPL'].dropna(), 20)
 momentum(newdata['AAPL'].dropna(), 20)
+volatility_breakouts(newdata['AAPL'].dropna(), 20)
+"""
