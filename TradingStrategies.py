@@ -213,18 +213,53 @@ def volatility_breakouts(data, days):
     ATR_data = pd.DataFrame({'ATR' : volatility_ATR}, index=index[days-1:])
     upper_trigger_data = pd.DataFrame({'Upper Trigger' : upper_trigger}, index=index[days-1:])
     lower_trigger_data = pd.DataFrame({'Lower Trigger' : lower_trigger}, index=index[days-1:])
-    sns.lineplot(ATR_data, palette=['blue'])
-    sns.lineplot(sdev_return_data, palette=['orange'])
-    sns.lineplot(sdev_price_data, palette=['purple'])
+    #sns.lineplot(ATR_data, palette=['blue'])
+    #sns.lineplot(sdev_return_data, palette=['orange'])
+    #sns.lineplot(sdev_price_data, palette=['purple'])
     sns.lineplot(data['Close'])
     sns.lineplot(upper_trigger_data, palette=['green'])
     sns.lineplot(lower_trigger_data, palette=['red'])
     plt.show()    
 
+def RSI_oscillator(data, days):
+    print("WARNING! THE RSI_OSCILLATOR VALUES VARY SLIGHTLY FROM REFERENCE DATA. REASON UNKNOWN.")
+    percent = data['Close'].pct_change().dropna() * 100
+    RSI = []
+    index = []
+    ups = 0
+    downs = 0
+    for i in percent[:days-1]:
+        if i > 0:
+            ups += i
+        else:
+            downs += abs(i)
+    try:
+        RSI.append(100 - (100 / (1 + ((ups / days) / (downs / days)))))
+    except:
+        RSI.append(100)
+    index.append(percent.index[days-2])
+    for i in range(days-1, len(percent)):
+        val = percent.iloc[i]
+        if val > 0:
+            ups = ((ups * (days-1)) + val) / days
+            downs *= ((days-1) / days)
+        else:
+            ups *= ((days-1) / days)
+            downs = ((downs * (days-1)) + abs(val)) / days
+        try:
+            RSI.append(100 - (100 / (1 + ((ups / days) / (downs / days)))))
+        except:
+            RSI.append(100)
+        index.append(percent.index[i])
+    RSI_data = pd.DataFrame({'RSI' : RSI}, index=index)
+    ax = sns.lineplot(RSI_data)
+    ax.axhline(70, color='green')
+    ax.axhline(30, color='red')
+    plt.show()
 
 
 interval = '1d'
-start_date = '2023-01-01'
+start_date = '2023-06-07'
 end_date = None
 
 symbols = ['CADUSD=X', 'INTC', 'GE', 'NG=F', 'AAPL', '^GSPC', 'CRWD']
@@ -296,5 +331,6 @@ print(newdata['AAPL']['High'].dropna())
 print(newdata.loc[:, ['AAPL', 'CRWD']]['AAPL']['High'].dropna())
 channels(newdata['AAPL'].dropna(), 20)
 momentum(newdata['AAPL'].dropna(), 20)
-volatility_breakouts(newdata['AAPL'].dropna(), 20)
+volatility_breakouts(newdata['AAPL'].dropna(), 14)
+RSI_oscillator(newdata['AAPL'].dropna(), 14)
 """
