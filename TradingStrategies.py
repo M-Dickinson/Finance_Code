@@ -44,18 +44,18 @@ def daily_risk(data, value):
     print('95% Confidence of gain/loss within : ' + str(risk * value * 2))
 
 def simple_moving_average(data, days):
-    return sum(data.iloc[-days:]) / days
+    return sum(data[-days:]) / days
 
 def exponential_moving_average(data, days):
-    curr = simple_moving_average(data.iloc[:days], days)
+    curr = simple_moving_average(data[:days], days)
     alpha = 2 / (1 + days)
-    for i in data.iloc[days:]:
+    for i in data[days:]:
         curr = (alpha * i) + ((1 - alpha) * curr)
     return curr
 
 def weighted_moving_average(data, days):
     total = 0
-    for i, j in zip(data.iloc[-days:], range(1, days + 1)):
+    for i, j in zip(data[-days:], range(1, days + 1)):
         total += i * j
     return total * (2 / (days**2 + days))
 
@@ -222,7 +222,7 @@ def volatility_breakouts(data, days):
     plt.show()    
 
 def RSI_oscillator(data, days):
-    print("WARNING! THE RSI_OSCILLATOR VALUES VARY SLIGHTLY FROM REFERENCE DATA. REASON UNKNOWN.")
+    print("WARNING! THE RSI OSCILLATOR VALUES VARY SLIGHTLY FROM REFERENCE DATA. REASON UNKNOWN.")
     percent = data['Close'].pct_change().dropna() * 100
     RSI = []
     index = []
@@ -256,6 +256,30 @@ def RSI_oscillator(data, days):
     ax.axhline(70, color='green')
     ax.axhline(30, color='red')
     plt.show()
+
+def slow_stochastics(data, Kdays, Ddays):
+    print("WARNING! THE STOCHASTIC OSCILLATOR VALUES VARY SLIGHTLY FROM REFERENCE DATA. REASON UNKNOWN.")
+    K = []
+    slowK = []
+    D = []
+    index = []
+    for i in range(Kdays, len(data)):
+        K.append(((data['Close'].iloc[i] - min(data['Low'].iloc[i-Kdays:i+1])) / (max(data['High'].iloc[i-Kdays:i+1]) - min(data['Low'].iloc[i-Kdays:i+1]))) * 100)
+    for i in range(2, len(K)):
+        slowK.append(simple_moving_average(K[i-2:i+1], 3))
+        index.append(data.index[i + Kdays])
+    slowK_data = pd.DataFrame({'SlowK' : slowK}, index=index)
+    index = []
+    for i in range(Ddays-1, len(slowK)):
+        D.append(simple_moving_average(slowK[i-Ddays-1:i+1], Ddays))
+        index.append(data.index[i + Kdays + Ddays - 1])
+    D_data = pd.DataFrame({'D' : D}, index = index)
+    ax = sns.lineplot(slowK_data, palette=['blue'])
+    sns.lineplot(D_data, palette=['gray'])
+    ax.axhline(80, color='green')
+    ax.axhline(20, color='red')
+    plt.show()
+
 
 
 interval = '1d'
@@ -334,3 +358,4 @@ momentum(newdata['AAPL'].dropna(), 20)
 volatility_breakouts(newdata['AAPL'].dropna(), 14)
 RSI_oscillator(newdata['AAPL'].dropna(), 14)
 """
+slow_stochastics(newdata['AAPL'].dropna(), 14, 3)
